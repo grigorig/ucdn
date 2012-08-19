@@ -247,8 +247,8 @@ int ucdn_get_mirrored(uint32_t code);
 uint32_t ucdn_mirror(uint32_t code);
 
 /**
- * Pairwise canonical decomposition of a codepoint. Note that this does
- * not include Hangul Jamo decomposition.
+ * Pairwise canonical decomposition of a codepoint. This includes
+ * Hangul Jamo decomposition.
  *
  * @param code Unicode codepoint
  * @param a filled with first codepoint of decomposition
@@ -268,8 +268,8 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b);
 int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed);
 
 /**
- * Pairwise canonical composition of two codepoints. Note that this does
- * not include Hangul Jamo composition.
+ * Pairwise canonical composition of two codepoints. This includes
+ * Hangul Jamo composition.
  *
  * @param code filled with composition
  * @param a first codepoint

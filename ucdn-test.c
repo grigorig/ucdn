@@ -38,9 +38,6 @@ int main(int argc, char **argv)
     printf("script %d\n", ucdn_get_script(codepoint));
     printf("bidi_class %d\n", ucdn_get_bidi_class(codepoint));
 
-    if (ucdn_decompose(codepoint, &a, &b))
-        printf("decomposition U+%04X U+%04X\n", a, b);
-
     if ((len = ucdn_compat_decompose(codepoint, decomposed))) {
         printf("compatibility_decomposition");
         for (i = 0; i < len; i++) {
@@ -48,6 +45,9 @@ int main(int argc, char **argv)
         }
         printf("\n");
     }
+
+    if (ucdn_decompose(codepoint, &a, &b))
+        printf("decomposition U+%04X U+%04X\n", a, b);
 
     if (ucdn_compose(&codepoint, a, b))
         printf("recomposition U+%04X\n", codepoint);

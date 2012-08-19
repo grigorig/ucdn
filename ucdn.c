@@ -40,6 +40,17 @@ typedef struct {
 
 #include "unicodedata_db.h"
 
+/* constants required for Hangul (de)composition */
+#define SBASE 0xAC00
+#define LBASE 0x1100
+#define VBASE 0x1161
+#define TBASE 0x11A7
+#define SCOUNT 11172
+#define LCOUNT 19
+#define VCOUNT 21
+#define TCOUNT 28
+#define NCOUNT (VCOUNT * TCOUNT)
+
 static UCDRecord *get_ucd_record(uint32_t code)
 {
     int index;
@@ -89,6 +100,32 @@ static int compare_mp(const void *a, const void *b)
     MirrorPair *mpa = (MirrorPair *)a;
     MirrorPair *mpb = (MirrorPair *)b;
     return mpa->from - mpb->from;
+}
+
+static int hangul_full_compose(uint32_t *code, uint32_t l, uint32_t v,
+        uint32_t t)
+{
+    int li = l - LBASE;
+    int vi = v - VBASE;
+    int ti = t - TBASE;
+
+    if (ti <= 0 || ti >= TCOUNT)
+        ti = 0;
+
+    *code = (li * VCOUNT + vi) * TCOUNT + ti + SBASE;
+    return ti == 0 ? 2 : 3;
+}
+
+static int hangul_full_decompose(uint32_t code, uint32_t *l, uint32_t *v,
+        uint32_t *t)
+{
+    int si = code - SBASE;
+
+    *l = LBASE + si / NCOUNT;
+    *v = VBASE + (si % NCOUNT) / TCOUNT;
+    *t = TBASE + si % TCOUNT;
+
+    return *t == TBASE ? 2 : 3;
 }
 
 const char *ucdn_get_unicode_version(void)
@@ -144,13 +181,29 @@ int ucdn_get_script(uint32_t code)
 
 int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 {
-    unsigned int *rec = get_decomp_record(code);
-    int len = rec[0] >> 8;
+    unsigned int *rec;
+    int len;
+
+    if (code >= SBASE && code < (SBASE + SCOUNT)) {
+        uint32_t l, v, t;
+        /* LVT decomposition needs a recomposition of the LV part,
+           to achieve a two-character decomposition */
+        if (hangul_full_decompose(code, &l, &v, &t) == 3) {
+            hangul_full_compose(&l, l, v, TBASE);
+            *a = l;
+            *b = t;
+            return 1;
+        }
+        *a = l;
+        *b = v;
+        return 1;
+    }
+
+    rec = get_decomp_record(code);
+    len = rec[0] >> 8;
 
     if ((rec[0] & 0xff) != 0 || len == 0)
         return 0;
-
-    /* TODO: Hangul Jamo decomposition */
 
     *a = rec[1];
     if (len > 1)
@@ -164,6 +217,21 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
 {
     int l, r, index, indexi;
+
+    if (b >= LBASE && b < (TBASE + TCOUNT)) {
+        /* LVT compositions are handled in two steps, so
+           fully decompose the first character if needed */
+        if (a >= SBASE && a < (SBASE + SCOUNT)) {
+            uint32_t l, v, t;
+            hangul_full_decompose(a, &l, &v, &t);
+            hangul_full_compose(code, l, v, b);
+            return 1;
+        } else if (a >= LBASE && a < (TBASE + TCOUNT)) {
+            hangul_full_compose(code, a, b, TBASE);
+            return 1;
+        }
+        return 0;
+    }
 
     l = get_comp_index(a, nfc_first);
     r = get_comp_index(b, nfc_last);
@@ -186,8 +254,6 @@ int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed)
 
     if (len == 0)
         return 0;
-
-    /* TODO: Hangul Jamo decomposition */
 
     for (i = 0; i < len; i++)
         decomposed[i] = rec[i + 1];
