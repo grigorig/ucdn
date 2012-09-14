@@ -102,30 +102,46 @@ static int compare_mp(const void *a, const void *b)
     return mpa->from - mpb->from;
 }
 
-static int hangul_full_compose(uint32_t *code, uint32_t l, uint32_t v,
-        uint32_t t)
-{
-    int li = l - LBASE;
-    int vi = v - VBASE;
-    int ti = t - TBASE;
-
-    if (ti <= 0 || ti >= TCOUNT)
-        ti = 0;
-
-    *code = (li * VCOUNT + vi) * TCOUNT + ti + SBASE;
-    return ti == 0 ? 2 : 3;
-}
-
-static int hangul_full_decompose(uint32_t code, uint32_t *l, uint32_t *v,
-        uint32_t *t)
+static int hangul_pair_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 {
     int si = code - SBASE;
 
-    *l = LBASE + si / NCOUNT;
-    *v = VBASE + (si % NCOUNT) / TCOUNT;
-    *t = TBASE + si % TCOUNT;
+    if (si < 0 || si >= SCOUNT)
+        return 0;
 
-    return *t == TBASE ? 2 : 3;
+    if (si % TCOUNT) {
+        /* LV,T */
+        *a = SBASE + (si / TCOUNT) * TCOUNT;
+        *b = TBASE + (si % TCOUNT);
+        return 3;
+    } else {
+        /* L,V */
+        *a = LBASE + (si / NCOUNT);
+        *b = VBASE + (si % NCOUNT) / TCOUNT;
+        return 2;
+    }
+}
+
+static int hangul_pair_compose(uint32_t *code, uint32_t a, uint32_t b)
+{
+    if (b < VBASE || b >= (TBASE + TCOUNT))
+        return 0;
+
+    if ((a < LBASE || a >= (LBASE + LCOUNT))
+            && (a < SBASE || a >= (SBASE + SCOUNT)))
+        return 0;
+
+    if (a >= SBASE) {
+        /* LV,T */
+        *code = a + (b - TBASE);
+        return 3;
+    } else {
+        /* L,V */
+        int li = a - LBASE;
+        int vi = b - VBASE;
+        *code = SBASE + li * NCOUNT + vi * TCOUNT;
+        return 2;
+    }
 }
 
 const char *ucdn_get_unicode_version(void)
@@ -184,20 +200,8 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
     unsigned int *rec;
     int len;
 
-    if (code >= SBASE && code < (SBASE + SCOUNT)) {
-        uint32_t l, v, t;
-        /* LVT decomposition needs a recomposition of the LV part,
-           to achieve a two-character decomposition */
-        if (hangul_full_decompose(code, &l, &v, &t) == 3) {
-            hangul_full_compose(&l, l, v, TBASE);
-            *a = l;
-            *b = t;
-            return 1;
-        }
-        *a = l;
-        *b = v;
+    if (hangul_pair_decompose(code, a, b))
         return 1;
-    }
 
     rec = get_decomp_record(code);
     len = rec[0] >> 8;
@@ -218,20 +222,8 @@ int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
 {
     int l, r, index, indexi;
 
-    if (b >= LBASE && b < (TBASE + TCOUNT)) {
-        /* LVT compositions are handled in two steps, so
-           fully decompose the first character if needed */
-        if (a >= SBASE && a < (SBASE + SCOUNT)) {
-            uint32_t l, v, t;
-            hangul_full_decompose(a, &l, &v, &t);
-            hangul_full_compose(code, l, v, b);
-            return 1;
-        } else if (a >= LBASE && a < (TBASE + TCOUNT)) {
-            hangul_full_compose(code, a, b, TBASE);
-            return 1;
-        }
-        return 0;
-    }
+    if (hangul_pair_compose(code, a, b))
+        return 1;
 
     l = get_comp_index(a, nfc_first);
     r = get_comp_index(b, nfc_last);
