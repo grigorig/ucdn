@@ -251,8 +251,11 @@ uint32_t ucdn_mirror(uint32_t code);
  * Hangul Jamo decomposition (see chapter 3.12 of the Unicode core
  * specification).
  *
+ * Hangul is decomposed into L and V jamos for LV forms, and an
+ * LV precomposed syllable and a T jamo for LVT forms.
+ *
  * @param code Unicode codepoint
- * @param a filled with first codepoint of decomposition (LV part for Hangul)
+ * @param a filled with first codepoint of decomposition
  * @param b filled with second codepoint of decomposition, or 0
  * @return success
  */
@@ -273,9 +276,13 @@ int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed);
  * Hangul Jamo composition (see chapter 3.12 of the Unicode core
  * specification).
  *
+ * Hangul composition expects either L and V jamos, or an LV
+ * precomposed syllable and a T jamo. This is exactly the inverse
+ * of pairwise Hangul decomposition.
+ *
  * @param code filled with composition
- * @param a first codepoint (LV part for Hangul)
- * @param b second codepoint (T part for Hangul)
+ * @param a first codepoint
+ * @param b second codepoint
  * @return success
  */
 int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b);
