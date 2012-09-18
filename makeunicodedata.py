@@ -166,7 +166,8 @@ def makeunicodedata(unicode, trace):
             bidirectional = BIDIRECTIONAL_NAMES.index(record[4])
             mirrored = record[9] == "Y"
             eastasianwidth = EASTASIANWIDTH_NAMES.index(record[15])
-            normalizationquickcheck = record[17]
+            # XXX: not used at the moment
+            normalizationquickcheck = 0 #record[17]
             scriptname = SCRIPT_NAMES.index(record[18])
             item = (
                 category, combining, bidirectional, mirrored, eastasianwidth,
@@ -362,30 +363,33 @@ def makeunicodedata(unicode, trace):
     print("};", file=fp)
     """
 
-    # split record index table
-    index1, index2, shift = splitbins(index, trace)
-
+    index0, index1, index2, shift1, shift2 = get_best_split(index)
     print("/* index tables for the database records */", file=fp)
-    print("#define SHIFT", shift, file=fp)
+    print("#define SHIFT1", shift1, file=fp)
+    print("#define SHIFT2", shift2, file=fp)
+    Array("index0", index0).dump(fp, trace)
     Array("index1", index1).dump(fp, trace)
     Array("index2", index2).dump(fp, trace)
 
-    # split decomposition index table
-    index1, index2, shift = splitbins(decomp_index, trace)
-
+    index0, index1, index2, shift1, shift2 = get_best_split(decomp_index)
     print("/* decomposition data */", file=fp)
     Array("decomp_data", decomp_data).dump(fp, trace)
 
     print("/* index tables for the decomposition data */", file=fp)
-    print("#define DECOMP_SHIFT", shift, file=fp)
+    print("#define DECOMP_SHIFT1", shift1, file=fp)
+    print("#define DECOMP_SHIFT2", shift2, file=fp)
+    Array("decomp_index0", index0).dump(fp, trace)
     Array("decomp_index1", index1).dump(fp, trace)
     Array("decomp_index2", index2).dump(fp, trace)
 
-    index, index2, shift = splitbins(comp_data, trace)
+    index0, index1, index2, shift1, shift2 = get_best_split(comp_data)
     print("/* NFC pairs */", file=fp)
-    print("#define COMP_SHIFT", shift, file=fp)
-    Array("comp_index", index).dump(fp, trace)
+    print("#define COMP_SHIFT1", shift1, file=fp)
+    print("#define COMP_SHIFT2", shift2, file=fp)
+    Array("comp_index0", index0).dump(fp, trace)
+    Array("comp_index1", index1).dump(fp, trace)
     Array("comp_data", index2).dump(fp, trace)
+
 
     # Generate delta tables for old versions
     for version, table, normalization in unicode.changed:
@@ -1412,6 +1416,59 @@ def splitbins(t, trace=0):
         for i in range(len(t)):
             assert t[i] == t2[(t1[i >> shift] << shift) + (i & mask)]
     return best
+
+def split3(tab, size1, size2):
+    blocks1 = {} # dict for block search (stage 1)
+    blocks2 = {} # dict for block search (stage 2)
+    stage0 = [] # contains block numbers (indices into stage 1 table)
+    stage1 = [] # contains block numbers (indices into stage 2 table)
+    stage2 = [] # contains actual data
+
+    # add blocks to stage2 and generate temporary stage1
+    stage1_tmp = []
+    for i in range(0, len(tab), size2):
+        block = tab[i:i+size2]
+        if not tuple(block) in blocks2:
+            blocks2[tuple(block)] = len(stage2) // size2;
+            stage2 += block;
+        stage1_tmp.append(blocks2[tuple(block)])
+
+    # add blocks to stage1 and generate stage0
+    for i in range(0, len(stage1_tmp), size1):
+        block = stage1_tmp[i:i+size1]
+        if not tuple(block) in blocks1:
+            blocks1[tuple(block)] = len(stage1) // size1;
+            stage1 += block;
+        stage0.append(blocks1[tuple(block)])
+
+    return stage0, stage1, stage2
+
+def get_type(seq):
+    type_size = [("uint8_t", 1), ("uint16_t", 2), ("uint32_t", 4),
+                    ("int8_t", 1), ("int16_t", 2), ("int32_t", 4)]
+    limits = [(0, 255), (0, 65535), (0, 4294967295),
+                (-128, 127), (-32768, 32767), (-2147483648, 2147483647)]
+    minval = min(seq)
+    maxval = max(seq)
+    for num, (minlimit, maxlimit) in enumerate(limits):
+        if minlimit <= minval and maxval <= maxlimit:
+            return type_size[num]
+
+def get_best_split(tab):
+    best_block_sizes = (1, 1)
+    best_size = 2**32
+    best_split = None
+    for s1 in range(1, 9):
+        for s2 in range(1, 9):
+            stages = split3(tab, 2**s1, 2**s2)
+            types = [get_type(x) for x in stages]
+            sizes = [len(s) * t[1] for s, t in zip(stages, types)]
+            if sum(sizes) < best_size:
+                best_size = sum(sizes)
+                best_block_sizes = s1, s2
+                best_split = stages
+    print("best", best_block_sizes)
+    return best_split + best_block_sizes
 
 if __name__ == "__main__":
     maketables(1)

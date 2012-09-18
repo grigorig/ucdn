@@ -53,13 +53,16 @@ typedef struct {
 
 static UCDRecord *get_ucd_record(uint32_t code)
 {
-    int index;
+    int index, offset;
 
     if (code >= 0x110000)
         index = 0;
     else {
-        index = index1[(code>>SHIFT)];
-        index = index2[(index<<SHIFT) + (code & ((1<<SHIFT) - 1))];
+        index  = index0[code >> (SHIFT1+SHIFT2)] << SHIFT1;
+        offset = (code >> SHIFT2) & ((1<<SHIFT1) - 1);
+        index  = index1[index + offset] << SHIFT2;
+        offset = code & ((1<<SHIFT2) - 1);
+        index  = index2[index + offset];
     }
 
     return &ucd_records[index];
@@ -67,13 +70,16 @@ static UCDRecord *get_ucd_record(uint32_t code)
 
 static unsigned int *get_decomp_record(uint32_t code)
 {
-    int index;
+    int index, offset;
 
     if (code >= 0x110000)
         index = 0;
     else {
-        index = decomp_index1[(code>>DECOMP_SHIFT)];
-        index = decomp_index2[(index<<DECOMP_SHIFT) + (code&((1<<DECOMP_SHIFT) - 1))];
+        index  = decomp_index0[code >> (DECOMP_SHIFT1+DECOMP_SHIFT2)] << DECOMP_SHIFT1;
+        offset = (code >> DECOMP_SHIFT2) & ((1<<DECOMP_SHIFT1) - 1);
+        index  = decomp_index1[index + offset] << DECOMP_SHIFT2;
+        offset = code & ((1<<DECOMP_SHIFT2) - 1);
+        index  = decomp_index2[index + offset];
     }
 
     return &decomp_data[index];
@@ -220,7 +226,7 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 
 int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
 {
-    int l, r, index, indexi;
+    int l, r, index, indexi, offset;
 
     if (hangul_pair_compose(code, a, b))
         return 1;
@@ -231,9 +237,12 @@ int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
     if (l < 0 || r < 0)
         return 0;
 
-    index = l * TOTAL_LAST + r;
-    indexi = comp_index[(index>>COMP_SHIFT)];
-    *code = comp_data[(indexi<<COMP_SHIFT) + (index & ((1<<COMP_SHIFT) - 1))];
+    indexi = l * TOTAL_LAST + r;
+    index  = comp_index0[indexi >> (COMP_SHIFT1+COMP_SHIFT2)] << COMP_SHIFT1;
+    offset = (indexi >> COMP_SHIFT2) & ((1<<COMP_SHIFT1) - 1);
+    index  = comp_index1[index + offset] << COMP_SHIFT2;
+    offset = indexi & ((1<<COMP_SHIFT2) - 1);
+    *code  = comp_data[index + offset];
 
     return *code != 0;
 }
