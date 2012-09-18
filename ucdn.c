@@ -68,7 +68,7 @@ static UCDRecord *get_ucd_record(uint32_t code)
     return &ucd_records[index];
 }
 
-static unsigned int *get_decomp_record(uint32_t code)
+static unsigned short *get_decomp_record(uint32_t code)
 {
     int index, offset;
 
@@ -201,9 +201,23 @@ int ucdn_get_script(uint32_t code)
     return get_ucd_record(code)->script;
 }
 
+static uint32_t decode_utf16(unsigned short **code_ptr)
+{
+    unsigned short *code = *code_ptr;
+
+    if ((code[0] & 0xd800) != 0xd800) {
+        *code_ptr += 1;
+        return (uint32_t)code[0];
+    } else {
+        *code_ptr += 2;
+        return 0x10000 + ((uint32_t)code[1] - 0xdc00) +
+            (((uint32_t)code[0] - 0xd800) << 10);
+    }
+}
+
 int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 {
-    unsigned int *rec;
+    unsigned short *rec;
     int len;
 
     if (hangul_pair_decompose(code, a, b))
@@ -215,9 +229,10 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
     if ((rec[0] & 0xff) != 0 || len == 0)
         return 0;
 
-    *a = rec[1];
+    rec++;
+    *a = decode_utf16(&rec);
     if (len > 1)
-        *b = rec[2];
+        *b = decode_utf16(&rec);
     else
         *b = 0;
 
@@ -250,14 +265,15 @@ int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
 int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed)
 {
     int i, len;
-    unsigned int *rec = get_decomp_record(code);
+    unsigned short *rec = get_decomp_record(code);
     len = rec[0] >> 8;
 
     if (len == 0)
         return 0;
 
+    rec++;
     for (i = 0; i < len; i++)
-        decomposed[i] = rec[i + 1];
+        decomposed[i] = decode_utf16(&rec);
 
     return len;
 }

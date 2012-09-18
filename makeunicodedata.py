@@ -223,9 +223,13 @@ def makeunicodedata(unicode, trace):
                 try:
                     i = decomp_data.index(decomp)
                 except ValueError:
+                    decomp_utf16 = []
+                    for code in decomp:
+                        if code < 0x10000: decomp_utf16.append(code)
+                        else: decomp_utf16.extend(encode_utf16_surrogates(code))
                     i = len(decomp_data)
-                    decomp_data.extend(decomp)
-                    decomp_size = decomp_size + len(decomp) * 2
+                    decomp_data.extend(decomp_utf16)
+                    decomp_size = decomp_size + len(decomp_utf16) * 2
             else:
                 i = 0
             decomp_index[char] = i
@@ -1469,6 +1473,15 @@ def get_best_split(tab):
                 best_split = stages
     print("best", best_block_sizes)
     return best_split + best_block_sizes
+
+def encode_utf16_surrogates(code):
+    assert(code < 0x110000)
+    code = code - 0x10000
+    low = code & 1023
+    high = code >> 10
+    high_sur = 0xd800 + high
+    low_sur = 0xdc00 + low
+    return high_sur, low_sur
 
 if __name__ == "__main__":
     maketables(1)
