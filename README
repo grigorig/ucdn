@@ -7,13 +7,13 @@ composition/decomposition and compatibility decomposition). More
 functionality might be provided in the future, such as additional
 properties, string normalization and encoding conversion.
 
-UCDN uses standard C89 with no particular dependencies or requirements,
-and can be easily integrated into existing projects. At the moment,
-it is not supposed to be used as a standalone library. The primary
-motivation behind UCDN development was to provide a standalone set
-of Unicode functions for the HarfBuzz OpenType shaping library. For
-this purpose, a HarfBuzz-specific wrapper is shipped along with it
-(hb-ucdn.h).
+UCDN uses standard C89 with no particular dependencies or requirements
+except for stdint.h, and can be easily integrated into existing
+projects. At the moment, it is not supposed to be used as a standalone
+library. The primary motivation behind UCDN development was to provide
+a standalone set of Unicode functions for the HarfBuzz OpenType
+shaping library. For this purpose, a HarfBuzz-specific wrapper is
+shipped along with it (hb-ucdn.h).
 
 UCDN is published under the ISC license, please see the license header
 in the C source code for more information. The makeunicodata.py script
