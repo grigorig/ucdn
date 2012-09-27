@@ -75,7 +75,8 @@ static unsigned short *get_decomp_record(uint32_t code)
     if (code >= 0x110000)
         index = 0;
     else {
-        index  = decomp_index0[code >> (DECOMP_SHIFT1+DECOMP_SHIFT2)] << DECOMP_SHIFT1;
+        index  = decomp_index0[code >> (DECOMP_SHIFT1+DECOMP_SHIFT2)]
+            << DECOMP_SHIFT1;
         offset = (code >> DECOMP_SHIFT2) & ((1<<DECOMP_SHIFT1) - 1);
         index  = decomp_index1[index + offset] << DECOMP_SHIFT2;
         offset = code & ((1<<DECOMP_SHIFT2) - 1);
@@ -150,6 +151,20 @@ static int hangul_pair_compose(uint32_t *code, uint32_t a, uint32_t b)
     }
 }
 
+static uint32_t decode_utf16(unsigned short **code_ptr)
+{
+    unsigned short *code = *code_ptr;
+
+    if ((code[0] & 0xd800) != 0xd800) {
+        *code_ptr += 1;
+        return (uint32_t)code[0];
+    } else {
+        *code_ptr += 2;
+        return 0x10000 + ((uint32_t)code[1] - 0xdc00) +
+            (((uint32_t)code[0] - 0xd800) << 10);
+    }
+}
+
 const char *ucdn_get_unicode_version(void)
 {
     return UNIDATA_VERSION;
@@ -180,6 +195,11 @@ int ucdn_get_mirrored(uint32_t code)
     return get_ucd_record(code)->mirrored;
 }
 
+int ucdn_get_script(uint32_t code)
+{
+    return get_ucd_record(code)->script;
+}
+
 uint32_t ucdn_mirror(uint32_t code)
 {
     if (get_ucd_record(code)->mirrored == 0)
@@ -194,25 +214,6 @@ uint32_t ucdn_mirror(uint32_t code)
         return code;
     else
         return res->to;
-}
-
-int ucdn_get_script(uint32_t code)
-{
-    return get_ucd_record(code)->script;
-}
-
-static uint32_t decode_utf16(unsigned short **code_ptr)
-{
-    unsigned short *code = *code_ptr;
-
-    if ((code[0] & 0xd800) != 0xd800) {
-        *code_ptr += 1;
-        return (uint32_t)code[0];
-    } else {
-        *code_ptr += 2;
-        return 0x10000 + ((uint32_t)code[1] - 0xdc00) +
-            (((uint32_t)code[0] - 0xd800) << 10);
-    }
 }
 
 int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
