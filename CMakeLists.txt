@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(ucdn C)
 
-ADD_DEFINITIONS(-O2 -Wall -std=c89)
+ADD_DEFINITIONS(-O2 -Wall -Werror -pedantic -std=c89)
 
 add_library(ucdn_static STATIC ucdn.c ucdn.h)
 add_library(ucdn_shared SHARED ucdn.c ucdn.h)

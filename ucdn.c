@@ -202,11 +202,13 @@ int ucdn_get_script(uint32_t code)
 
 uint32_t ucdn_mirror(uint32_t code)
 {
+    MirrorPair mp = {0};
+    MirrorPair *res;
+
     if (get_ucd_record(code)->mirrored == 0)
         return code;
 
-    MirrorPair mp = {code, 0};
-    MirrorPair *res;
+    mp.from = code;
     res = bsearch(&mp, mirror_pairs, BIDI_MIRROR_LEN, sizeof(MirrorPair),
             compare_mp);
 
