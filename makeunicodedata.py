@@ -146,7 +146,7 @@ def maketables(trace=0):
 def makeunicodedata(unicode, trace):
 
     dummy = (CATEGORY_NAMES.index("Cn"), 0, BIDIRECTIONAL_NAMES.index("ON"), 0,
-        EASTASIANWIDTH_NAMES.index("N"), 0, 0)
+        EASTASIANWIDTH_NAMES.index("N"), 0, SCRIPT_NAMES.index("Unknown"))
     table = [dummy]
     cache = {0: dummy}
     index = [0] * len(unicode.chars)
@@ -967,7 +967,8 @@ class UnicodeData:
     def __init__(self, version,
                  linebreakprops=False,
                  expand=1,
-                 cjk_check=True):
+                 cjk_check=True,
+                 named_seq=False):
         self.changed = []
         table = [None] * 0x110000
         bidi = []
@@ -979,6 +980,10 @@ class UnicodeData:
                 s = s.strip().split(";")
                 char = int(s[0], 16)
                 table[char] = s
+
+        for i in range(0, 0x110000):
+            if table[i] is None:
+                table[i] = ["", "UNASSIGNED CODEPOINT", "Cn", "0", "ON", "", "", "", "", "N", "", "", "", "", ""]
 
         cjk_ranges_found = []
 
@@ -1012,7 +1017,7 @@ class UnicodeData:
 
         # check for name aliases and named sequences, see #12753
         # aliases and named sequences are not in 3.2.0
-        if version != '3.2.0':
+        if version != '3.2.0' and named_seq:
             self.aliases = []
             # store aliases in the Private Use Area 15, in range U+F0000..U+F00FF,
             # in order to take advantage of the compression and lookup
@@ -1066,7 +1071,7 @@ class UnicodeData:
                 char = int(s.split()[0],16)
                 self.exclusions[char] = 1
 
-        widths = [None] * 0x110000
+        widths = ["N"] * 0x110000
         with open_data(EASTASIAN_WIDTH, version) as file:
             for s in file:
                 s = s.strip()
