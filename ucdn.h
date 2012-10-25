@@ -17,6 +17,10 @@
 #ifndef UCDN_H
 #define UCDN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #define UCDN_EAST_ASIAN_F 0
@@ -286,5 +290,9 @@ int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed);
  * @return success
  */
 int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
