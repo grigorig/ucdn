@@ -286,14 +286,14 @@ def makeunicodedata(unicode, trace):
     print(file=fp)
     print('#define UNIDATA_VERSION "%s"' % UNIDATA_VERSION, file=fp)
     print("/* a list of unique database records */", file=fp)
-    print("static UCDRecord ucd_records[] = {", file=fp)
+    print("static const UCDRecord ucd_records[] = {", file=fp)
     for item in table:
         print("    {%d, %d, %d, %d, %d, %d, %d}," % item, file=fp)
     print("};", file=fp)
     print(file=fp)
 
     print("#define BIDI_MIRROR_LEN %d" % len(unicode.bidi), file=fp)
-    print("static MirrorPair mirror_pairs[] = {", file=fp)
+    print("static const MirrorPair mirror_pairs[] = {", file=fp)
     for pair in unicode.bidi:
         print("    {%d, %d}," % pair, file=fp)
     print("};", file=fp)
@@ -302,12 +302,12 @@ def makeunicodedata(unicode, trace):
     print("/* Reindexing of NFC first characters. */", file=fp)
     print("#define TOTAL_FIRST",total_first, file=fp)
     print("#define TOTAL_LAST",total_last, file=fp)
-    print("static Reindex nfc_first[] = {", file=fp)
+    print("static const Reindex nfc_first[] = {", file=fp)
     for start,end in comp_first_ranges:
         print("  { %d, %d, %d}," % (start,end-start,comp_first[start]), file=fp)
     print("  {0,0,0}", file=fp)
     print("};\n", file=fp)
-    print("static Reindex nfc_last[] = {", file=fp)
+    print("static const Reindex nfc_last[] = {", file=fp)
     for start,end in comp_last_ranges:
         print("  { %d, %d, %d}," % (start,end-start,comp_last[start]), file=fp)
     print("  {0,0,0}", file=fp)
@@ -1334,7 +1334,7 @@ class Array:
         size = getsize(self.data)
         if trace:
             print(self.name+":", size*len(self.data), "bytes", file=sys.stderr)
-        file.write("static ")
+        file.write("static const ")
         if size == 1:
             file.write("unsigned char")
         elif size == 2:
