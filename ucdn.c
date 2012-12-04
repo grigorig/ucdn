@@ -151,9 +151,9 @@ static int hangul_pair_compose(uint32_t *code, uint32_t a, uint32_t b)
     }
 }
 
-static uint32_t decode_utf16(unsigned short **code_ptr)
+static uint32_t decode_utf16(const unsigned short **code_ptr)
 {
-    unsigned short *code = *code_ptr;
+    const unsigned short *code = *code_ptr;
 
     if ((code[0] & 0xd800) != 0xd800) {
         *code_ptr += 1;
@@ -220,13 +220,13 @@ uint32_t ucdn_mirror(uint32_t code)
 
 int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
 {
-    unsigned short *rec;
+    const unsigned short *rec;
     int len;
 
     if (hangul_pair_decompose(code, a, b))
         return 1;
 
-    rec = (unsigned short *)get_decomp_record(code);
+    rec = get_decomp_record(code);
     len = rec[0] >> 8;
 
     if ((rec[0] & 0xff) != 0 || len == 0)
@@ -268,7 +268,7 @@ int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
 int ucdn_compat_decompose(uint32_t code, uint32_t *decomposed)
 {
     int i, len;
-    unsigned short *rec = (unsigned short *)get_decomp_record(code);
+    const unsigned short *rec = get_decomp_record(code);
     len = rec[0] >> 8;
 
     if (len == 0)
