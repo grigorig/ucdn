@@ -37,7 +37,7 @@ SCRIPT = sys.argv[0]
 VERSION = "3.2"
 
 # The Unicode Database
-UNIDATA_VERSION = "6.2.0"
+UNIDATA_VERSION = "7.0.0"
 UNICODE_DATA = "UnicodeData%s.txt"
 COMPOSITION_EXCLUSIONS = "CompositionExclusions%s.txt"
 EASTASIAN_WIDTH = "EastAsianWidth%s.txt"
@@ -69,7 +69,7 @@ CATEGORY_NAMES = [ "Cc", "Cf", "Cn", "Co", "Cs", "Ll", "Lm", "Lo", "Lt",
 
 BIDIRECTIONAL_NAMES = [ "L", "LRE", "LRO", "R", "AL", "RLE", "RLO",
     "PDF", "EN", "ES", "ET", "AN", "CS", "NSM", "BN", "B", "S", "WS",
-    "ON" ]
+    "ON" , "LRI", "RLI", "FSI", "PDI"]
 
 SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Hebrew", "Arabic", "Syriac", "Thaana", "Devanagari", "Bengali",
@@ -89,7 +89,13 @@ SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Imperial_Aramaic", "Old_South_Arabian", "Inscriptional_Parthian",
     "Inscriptional_Pahlavi", "Old_Turkic", "Kaithi", "Batak", "Brahmi",
     "Mandaic", "Chakma", "Meroitic_Cursive", "Meroitic_Hieroglyphs", "Miao",
-    "Sharada", "Sora_Sompeng", "Takri", "Unknown" ]
+    "Sharada", "Sora_Sompeng", "Takri", "Unknown", "Bassa_Vah",
+    "Caucasian_Albanian", "Duployan", "Elbasan", "Grantha", "Khojki",
+    "Khudawadi", "Linear_A", "Mahajani", "Manichaean", "Mende_Kikakui",
+    "Modi", "Mro", "Nabataean", "Old_North_Arabian", "Old_Permic",
+    "Pahawh_Hmong", "Palmyrene", "Pau_Cin_Hau", "Psalter_Pahlavi", "Siddham",
+    "Tirhuta", "Warang_Citi",
+    ]
 
 EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
 
