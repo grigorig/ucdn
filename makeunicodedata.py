@@ -37,7 +37,7 @@ SCRIPT = sys.argv[0]
 VERSION = "3.2"
 
 # The Unicode Database
-UNIDATA_VERSION = "7.0.0"
+UNIDATA_VERSION = "8.0.0"
 UNICODE_DATA = "UnicodeData%s.txt"
 COMPOSITION_EXCLUSIONS = "CompositionExclusions%s.txt"
 EASTASIAN_WIDTH = "EastAsianWidth%s.txt"
@@ -94,7 +94,8 @@ SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Khudawadi", "Linear_A", "Mahajani", "Manichaean", "Mende_Kikakui",
     "Modi", "Mro", "Nabataean", "Old_North_Arabian", "Old_Permic",
     "Pahawh_Hmong", "Palmyrene", "Pau_Cin_Hau", "Psalter_Pahlavi", "Siddham",
-    "Tirhuta", "Warang_Citi",
+    "Tirhuta", "Warang_Citi", "Ahom", "Anatolian_Hieroglyphs", "Hatran",
+    "Multani", "Old_Hungarian", "SignWriting"
     ]
 
 EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
@@ -121,10 +122,11 @@ EXTENDED_CASE_MASK = 0x4000
 # these ranges need to match unicodedata.c:is_unified_ideograph
 cjk_ranges = [
     ('3400', '4DB5'),
-    ('4E00', '9FCC'),
+    ('4E00', '9FD5'),
     ('20000', '2A6D6'),
     ('2A700', '2B734'),
-    ('2B740', '2B81D')
+    ('2B740', '2B81D'),
+    ('2B820', '2CEA1')
 ]
 
 def maketables(trace=0):
