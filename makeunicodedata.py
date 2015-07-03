@@ -989,10 +989,6 @@ class UnicodeData:
                 char = int(s[0], 16)
                 table[char] = s
 
-        for i in range(0, 0x110000):
-            if table[i] is None:
-                table[i] = ["", "UNASSIGNED CODEPOINT", "Cn", "0", "ON", "", "", "", "", "N", "", "", "", "", ""]
-
         cjk_ranges_found = []
 
         # expand first-last ranges
@@ -1016,6 +1012,11 @@ class UnicodeData:
                     table[i] = f2
             if cjk_check and cjk_ranges != cjk_ranges_found:
                 raise ValueError("CJK ranges deviate: have %r" % cjk_ranges_found)
+
+        # set default to unassigned characters
+        for i in range(0, 0x110000):
+            if table[i] is None:
+                table[i] = ["", "UNASSIGNED CODEPOINT", "Cn", "0", "ON", "", "", "", "", "N", "", "", "", "", ""]
 
         # public attributes
         self.filename = UNICODE_DATA % ''
