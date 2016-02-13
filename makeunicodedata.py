@@ -102,6 +102,15 @@ EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
 
 MANDATORY_LINE_BREAKS = [ "BK", "CR", "LF", "NL" ]
 
+# the first 27 classes ordered according to pair table from UAX 14
+LINEBREAK_CLASSES = [ "OP", "CL", "CP", "QU", "GL", "NS", "EX", "SY",
+    "IS", "PR", "PO", "NU", "AL", "HL", "ID", "IN", "HY", "BA", "BB",
+    "B2", "ZW", "CM", "WJ", "H2", "H3", "JL", "JV", "JT", "RI",
+    # end of pair table
+    "AI", "BK", "CB", "CJ", "CR", "HL", "LF", "NL", "RI", "SA", "SG",
+    "SP", "XX"
+    ]
+
 # note: should match definitions in Objects/unicodectype.c
 ALPHA_MASK = 0x01
 DECIMAL_MASK = 0x02
@@ -154,7 +163,8 @@ def maketables(trace=0):
 def makeunicodedata(unicode, trace):
 
     dummy = (CATEGORY_NAMES.index("Cn"), 0, BIDIRECTIONAL_NAMES.index("ON"), 0,
-        EASTASIANWIDTH_NAMES.index("N"), 0, SCRIPT_NAMES.index("Unknown"))
+        EASTASIANWIDTH_NAMES.index("N"), 0, SCRIPT_NAMES.index("Unknown"),
+        LINEBREAK_CLASSES.index("XX"))
     table = [dummy]
     cache = {0: dummy}
     index = [0] * len(unicode.chars)
@@ -177,9 +187,10 @@ def makeunicodedata(unicode, trace):
             # XXX: not used at the moment
             normalizationquickcheck = 0 #record[17]
             scriptname = SCRIPT_NAMES.index(record[18])
+            linebreakclass = LINEBREAK_CLASSES.index(record[19])
             item = (
                 category, combining, bidirectional, mirrored, eastasianwidth,
-                normalizationquickcheck, scriptname
+                normalizationquickcheck, scriptname, linebreakclass
                 )
             # add entry to index and item tables
             i = cache.get(item)
@@ -296,7 +307,7 @@ def makeunicodedata(unicode, trace):
     print("/* a list of unique database records */", file=fp)
     print("static const UCDRecord ucd_records[] = {", file=fp)
     for item in table:
-        print("    {%d, %d, %d, %d, %d, %d, %d}," % item, file=fp)
+        print("    {%d, %d, %d, %d, %d, %d, %d, %d}," % item, file=fp)
     print("};", file=fp)
     print(file=fp)
 
@@ -970,7 +981,7 @@ class UnicodeData:
     # [ID, name, category, combining, bidi, decomp,  (6)
     #  decimal, digit, numeric, bidi-mirrored, Unicode-1-name, (11)
     #  ISO-comment, uppercase, lowercase, titlecase, ea-width, (16)
-    #  derived-props] (17)
+    #  derived-props, quickchecks, scripts, linebreak-class] (20)
 
     def __init__(self, version,
                  linebreakprops=False,
@@ -1016,7 +1027,8 @@ class UnicodeData:
         # set default to unassigned characters
         for i in range(0, 0x110000):
             if table[i] is None:
-                table[i] = ["", "UNASSIGNED CODEPOINT", "Cn", "0", "ON", "", "", "", "", "N", "", "", "", "", ""]
+                table[i] = ["", "UNASSIGNED CODEPOINT", "Cn", "0", "ON", "",
+                        "", "", "", "N", "", "", "", "", ""]
 
         # public attributes
         self.filename = UNICODE_DATA % ''
@@ -1177,6 +1189,23 @@ class UnicodeData:
                 s = s.partition('#')[0]
                 s = [i.strip() for i in s.split(';')]
                 if len(s) < 2:
+                    continue
+                if '..' not in s[0]:
+                    first = last = int(s[0], 16)
+                else:
+                    first, last = [int(c, 16) for c in s[0].split('..')]
+                for char in range(first, last+1):
+                    table[char][-1] = s[1]
+
+        for i in range(0, 0x110000):
+            if table[i] is not None:
+                table[i].append("XX")
+
+        with open_data(LINE_BREAK, version) as file:
+            for s in file:
+                s = s.partition('#')[0]
+                s = [i.strip() for i in s.split(';')]
+                if len(s) < 2 or s[1] not in LINEBREAK_CLASSES:
                     continue
                 if '..' not in s[0]:
                     first = last = int(s[0], 16)

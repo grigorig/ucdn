@@ -36,6 +36,7 @@ int main(int argc, char **argv)
         printf("mirrored U+%04X\n", ucdn_mirror(codepoint));
     printf("eastasian_width %d\n", ucdn_get_east_asian_width(codepoint));
     printf("script %d\n", ucdn_get_script(codepoint));
+    printf("linebreak_class %d\n", ucdn_get_linebreak_class(codepoint));
     printf("bidi_class %d\n", ucdn_get_bidi_class(codepoint));
 
     if ((len = ucdn_compat_decompose(codepoint, decomposed))) {
