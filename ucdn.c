@@ -25,7 +25,6 @@ typedef struct {
     unsigned char bidi_class;
     unsigned char mirrored;
     unsigned char east_asian_width;
-    unsigned char normalization_check;
     unsigned char script;
     unsigned char linebreak_class;
 } UCDRecord;
