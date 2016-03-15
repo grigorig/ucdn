@@ -231,9 +231,10 @@ int ucdn_get_resolved_linebreak_class(uint32_t code)
 
     case UCDN_LINEBREAK_CLASS_NL:
         return UCDN_LINEBREAK_CLASS_BK;
-    }
 
-    return record->linebreak_class;
+    default:
+        return record->linebreak_class;
+    }
 }
 
 uint32_t ucdn_mirror(uint32_t code)
