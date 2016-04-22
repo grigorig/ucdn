@@ -34,6 +34,11 @@ typedef struct {
 } MirrorPair;
 
 typedef struct {
+  unsigned short from, to;
+  unsigned char type;
+} BracketPair;
+
+typedef struct {
     unsigned int start;
     short count, index;
 } Reindex;
@@ -107,6 +112,24 @@ static int compare_mp(const void *a, const void *b)
     MirrorPair *mpa = (MirrorPair *)a;
     MirrorPair *mpb = (MirrorPair *)b;
     return mpa->from - mpb->from;
+}
+
+static int compare_bp(const void *a, const void *b)
+{
+    BracketPair *bpa = (BracketPair *)a;
+    BracketPair *bpb = (BracketPair *)b;
+    return bpa->from - bpb->from;
+}
+
+static BracketPair *search_bp(uint32_t code)
+{
+    BracketPair bp = {0,0,2};
+    BracketPair *res;
+
+    bp.from = code;
+    res = bsearch(&bp, bracket_pairs, BIDI_BRACKET_LEN, sizeof(BracketPair),
+            compare_bp);
+    return res;
 }
 
 static int hangul_pair_decompose(uint32_t code, uint32_t *a, uint32_t *b)
@@ -252,6 +275,24 @@ uint32_t ucdn_mirror(uint32_t code)
         return code;
     else
         return res->to;
+}
+
+uint32_t ucdn_paired_bracket(uint32_t code)
+{
+    BracketPair *res = search_bp(code);
+    if (res == NULL)
+        return code;
+    else
+        return res->to;
+}
+
+int ucdn_paired_bracket_type(uint32_t code)
+{
+    BracketPair *res = search_bp(code);
+    if (res == NULL)
+        return UCDN_BIDI_PAIRED_BRACKET_TYPE_NONE;
+    else
+        return res->type;
 }
 
 int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)

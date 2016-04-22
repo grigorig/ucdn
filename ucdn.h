@@ -259,6 +259,10 @@ extern "C" {
 #define UCDN_BIDI_CLASS_FSI 21
 #define UCDN_BIDI_CLASS_PDI 22
 
+#define UCDN_BIDI_PAIRED_BRACKET_TYPE_OPEN 0
+#define UCDN_BIDI_PAIRED_BRACKET_TYPE_CLOSE 1
+#define UCDN_BIDI_PAIRED_BRACKET_TYPE_NONE 2
+
 /**
  * Return version of the Unicode database.
  *
@@ -344,6 +348,25 @@ int ucdn_get_mirrored(uint32_t code);
  * mirrored character exists
  */
 uint32_t ucdn_mirror(uint32_t code);
+
+/**
+ * Get paired bracket for a codepoint.
+ *
+ * @param code Unicode codepoint
+ * @return paired bracket codepoint or the original codepoint if no
+ * paired bracket character exists
+ */
+uint32_t ucdn_paired_bracket(uint32_t code);
+
+/**
+ * Get paired bracket type for a codepoint.
+ *
+ * @param code Unicode codepoint
+ * @return value according to UCDN_BIDI_PAIRED_BRACKET_TYPE_* and as defined
+ * in UAX#9.
+ *
+ */
+int ucdn_paired_bracket_type(uint32_t code);
 
 /**
  * Pairwise canonical decomposition of a codepoint. This includes

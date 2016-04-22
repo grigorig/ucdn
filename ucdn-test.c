@@ -34,6 +34,18 @@ int main(int argc, char **argv)
     printf("general_category %d\n", ucdn_get_general_category(codepoint));
     if (ucdn_get_mirrored(codepoint))
         printf("mirrored U+%04X\n", ucdn_mirror(codepoint));
+
+    switch(ucdn_paired_bracket_type(codepoint)) {
+        case UCDN_BIDI_PAIRED_BRACKET_TYPE_NONE:
+            break;
+        default:
+            if (ucdn_paired_bracket_type(codepoint) == UCDN_BIDI_PAIRED_BRACKET_TYPE_OPEN)
+                printf("paired bracket type open\n");
+            else
+                printf("paired bracket type close\n");
+            printf("paired bracket U+%04X\n", ucdn_paired_bracket(codepoint));
+    }
+
     printf("eastasian_width %d\n", ucdn_get_east_asian_width(codepoint));
     printf("script %d\n", ucdn_get_script(codepoint));
     printf("linebreak_class %d\n", ucdn_get_linebreak_class(codepoint));
