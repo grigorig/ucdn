@@ -51,6 +51,7 @@ SPECIAL_CASING = "SpecialCasing%s.txt"
 CASE_FOLDING = "CaseFolding%s.txt"
 SCRIPTS = "Scripts%s.txt"
 BIDI_MIRRORING = "BidiMirroring%s.txt"
+BIDI_BRACKETS = "BidiBrackets%s.txt"
 
 # Private Use Areas -- in planes 1, 15, 16
 PUA_1 = range(0xE000, 0xF900)
@@ -110,6 +111,8 @@ LINEBREAK_CLASSES = [ "OP", "CL", "CP", "QU", "GL", "NS", "EX", "SY",
     "AI", "BK", "CB", "CJ", "CR", "HL", "LF", "NL", "RI", "SA", "SG",
     "SP", "XX"
     ]
+
+BIDI_PAIRED_BRACKET_TYPES = [ "o", "c", "n"]
 
 # note: should match definitions in Objects/unicodectype.c
 ALPHA_MASK = 0x01
@@ -294,7 +297,8 @@ def makeunicodedata(unicode, trace):
     print(total_first, "first characters in NFC")
     print(total_last, "last characters in NFC")
     print(len(comp_pairs), "NFC pairs")
-    print(len(unicode.bidi), "bidi mirroring pairs")
+    print(len(unicode.bidi_mirroring), "bidi mirroring pairs")
+    print(len(unicode.bidi_brackets), "bidi bracket pairs")
 
     print("--- Writing", FILE, "...")
 
@@ -309,10 +313,17 @@ def makeunicodedata(unicode, trace):
     print("};", file=fp)
     print(file=fp)
 
-    print("#define BIDI_MIRROR_LEN %d" % len(unicode.bidi), file=fp)
+    print("#define BIDI_MIRROR_LEN %d" % len(unicode.bidi_mirroring), file=fp)
     print("static const MirrorPair mirror_pairs[] = {", file=fp)
-    for pair in unicode.bidi:
+    for pair in unicode.bidi_mirroring:
         print("    {%d, %d}," % pair, file=fp)
+    print("};", file=fp)
+    print(file=fp)
+
+    print("#define BIDI_BRACKET_LEN %d" % len(unicode.bidi_brackets), file=fp)
+    print("static const BracketPair bracket_pairs[] = {", file=fp)
+    for triple in unicode.bidi_brackets:
+        print("    {%d, %d, %d}," % triple, file=fp)
     print("};", file=fp)
     print(file=fp)
 
@@ -988,7 +999,8 @@ class UnicodeData:
                  named_seq=False):
         self.changed = []
         table = [None] * 0x110000
-        bidi = []
+        bidi_mirroring = []
+        bidi_brackets = []
         with open_data(UNICODE_DATA, version) as file:
             while 1:
                 s = file.readline()
@@ -1031,7 +1043,8 @@ class UnicodeData:
         # public attributes
         self.filename = UNICODE_DATA % ''
         self.table = table
-        self.bidi = bidi
+        self.bidi_mirroring = bidi_mirroring
+        self.bidi_brackets = bidi_brackets
         self.chars = list(range(0x110000)) # unicode 3.2
 
         # check for name aliases and named sequences, see #12753
@@ -1265,7 +1278,14 @@ class UnicodeData:
                 s = [i.strip() for i in s.split(';')]
                 if len(s) < 2:
                     continue
-                bidi.append((int(s[0], 16), int(s[1], 16)))
+                bidi_mirroring.append((int(s[0], 16), int(s[1], 16)))
+        with open_data(BIDI_BRACKETS, version) as file:
+            for s in file:
+                s = s.partition('#')[0]
+                s = [i.strip() for i in s.split(';')]
+                if len(s) < 3:
+                    continue
+                bidi_brackets.append((int(s[0], 16), int(s[1], 16), BIDI_PAIRED_BRACKET_TYPES.index(s[2])))
 
     def uselatin1(self):
         # restrict character range to ISO Latin 1
