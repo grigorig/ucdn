@@ -37,21 +37,21 @@ SCRIPT = sys.argv[0]
 VERSION = "3.2"
 
 # The Unicode Database
-UNIDATA_VERSION = "8.0.0"
-UNICODE_DATA = "UnicodeData%s.txt"
-COMPOSITION_EXCLUSIONS = "CompositionExclusions%s.txt"
-EASTASIAN_WIDTH = "EastAsianWidth%s.txt"
-UNIHAN = "Unihan%s.zip"
-DERIVED_CORE_PROPERTIES = "DerivedCoreProperties%s.txt"
-DERIVEDNORMALIZATION_PROPS = "DerivedNormalizationProps%s.txt"
-LINE_BREAK = "LineBreak%s.txt"
-NAME_ALIASES = "NameAliases%s.txt"
-NAMED_SEQUENCES = "NamedSequences%s.txt"
-SPECIAL_CASING = "SpecialCasing%s.txt"
-CASE_FOLDING = "CaseFolding%s.txt"
-SCRIPTS = "Scripts%s.txt"
-BIDI_MIRRORING = "BidiMirroring%s.txt"
-BIDI_BRACKETS = "BidiBrackets%s.txt"
+UNIDATA_VERSION = "9.0.0"
+UNICODE_DATA = "UnicodeData%sd6.txt"
+COMPOSITION_EXCLUSIONS = "CompositionExclusions%sd1.txt"
+EASTASIAN_WIDTH = "EastAsianWidth%sd4.txt"
+UNIHAN = "Unihan%sd3.zip"
+DERIVED_CORE_PROPERTIES = "DerivedCoreProperties%sd17.txt"
+DERIVEDNORMALIZATION_PROPS = "DerivedNormalizationProps%sd17.txt"
+LINE_BREAK = "LineBreak%sd4.txt"
+NAME_ALIASES = "NameAliases%sd1.txt"
+NAMED_SEQUENCES = "NamedSequences%sd1.txt"
+SPECIAL_CASING = "SpecialCasing%sd17.txt"
+CASE_FOLDING = "CaseFolding%sd17.txt"
+SCRIPTS = "Scripts%sd17.txt"
+BIDI_MIRRORING = "BidiMirroring%sd1.txt"
+BIDI_BRACKETS = "BidiBrackets%sd1.txt"
 
 # Private Use Areas -- in planes 1, 15, 16
 PUA_1 = range(0xE000, 0xF900)
@@ -96,7 +96,8 @@ SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Modi", "Mro", "Nabataean", "Old_North_Arabian", "Old_Permic",
     "Pahawh_Hmong", "Palmyrene", "Pau_Cin_Hau", "Psalter_Pahlavi", "Siddham",
     "Tirhuta", "Warang_Citi", "Ahom", "Anatolian_Hieroglyphs", "Hatran",
-    "Multani", "Old_Hungarian", "SignWriting"
+    "Multani", "Old_Hungarian", "SignWriting", "Adlam", "Bhaiksuki",
+    "Marchen", "Newa", "Osage", "Tangut"
     ]
 
 EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
@@ -971,7 +972,7 @@ def open_data(template, version):
             # irregular url structure
             url = 'http://www.unicode.org/Public/3.2-Update/' + local
         else:
-            url = ('http://www.unicode.org/Public/%s/ucd/'+template) % (version, '')
+            url = ('http://www.unicode.org/Public/%s/ucd/'+template) % (version, "-"+version)
         urllib.request.urlretrieve(url, filename=local)
     if local.endswith('.txt'):
         return open(local, encoding='utf-8')
