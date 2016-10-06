@@ -127,8 +127,8 @@ static BracketPair *search_bp(uint32_t code)
     BracketPair *res;
 
     bp.from = code;
-    res = bsearch(&bp, bracket_pairs, BIDI_BRACKET_LEN, sizeof(BracketPair),
-            compare_bp);
+    res = (BracketPair*) bsearch(&bp, bracket_pairs, BIDI_BRACKET_LEN,
+                                 sizeof(BracketPair), compare_bp);
     return res;
 }
 
@@ -268,8 +268,8 @@ uint32_t ucdn_mirror(uint32_t code)
         return code;
 
     mp.from = code;
-    res = bsearch(&mp, mirror_pairs, BIDI_MIRROR_LEN, sizeof(MirrorPair),
-            compare_mp);
+    res = (MirrorPair*) bsearch(&mp, mirror_pairs, BIDI_MIRROR_LEN,
+                                sizeof(MirrorPair), compare_mp);
 
     if (res == NULL)
         return code;
