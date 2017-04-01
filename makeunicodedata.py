@@ -1,9 +1,7 @@
 #
 # (re)generate unicode property and type databases
 #
-# this script converts a unicode 3.2 database file to
-# Modules/unicodedata_db.h, Modules/unicodename_db.h,
-# and Objects/unicodetype_db.h
+# this script converts a unicode database file to ucdn_db.h
 #
 # history:
 # 2000-09-24 fl   created (based on bits and pieces from unidb)
@@ -172,7 +170,7 @@ def makeunicodedata(unicode, trace):
     cache = {0: dummy}
     index = [0] * len(unicode.chars)
 
-    FILE = "unicodedata_db.h"
+    FILE = "ucdn_db.h"
 
     print("--- Preparing", FILE, "...")
 

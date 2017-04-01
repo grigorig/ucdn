@@ -17,3 +17,14 @@ install(TARGETS ucdn
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
 install(FILES ucdn.h DESTINATION include)
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(Check REQUIRED)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CHECK_INCLUDE_DIRS})
+
+add_executable(ucdn-unittest ucdn-unittest.c)
+target_link_libraries(ucdn-unittest ucdn ${CHECK_LIBRARIES} pthread)
+
+enable_testing()
+add_test(NAME ucdn-unitttest COMMAND ucdn-unittest)
