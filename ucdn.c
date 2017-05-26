@@ -178,7 +178,7 @@ static uint32_t decode_utf16(const unsigned short **code_ptr)
 {
     const unsigned short *code = *code_ptr;
 
-    if ((code[0] & 0xd800) != 0xd800) {
+    if (code[0] < 0xd800 || code[0] > 0xdc00) {
         *code_ptr += 1;
         return (uint32_t)code[0];
     } else {
