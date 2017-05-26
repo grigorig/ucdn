@@ -23,7 +23,6 @@ typedef struct {
     unsigned char category;
     unsigned char combining;
     unsigned char bidi_class;
-    unsigned char mirrored;
     unsigned char east_asian_width;
     unsigned char script;
     unsigned char linebreak_class;
@@ -220,7 +219,7 @@ int ucdn_get_bidi_class(uint32_t code)
 
 int ucdn_get_mirrored(uint32_t code)
 {
-    return get_ucd_record(code)->mirrored;
+    return ucdn_mirror(code) != code;
 }
 
 int ucdn_get_script(uint32_t code)
@@ -268,9 +267,6 @@ uint32_t ucdn_mirror(uint32_t code)
 {
     MirrorPair mp = {0};
     MirrorPair *res;
-
-    if (get_ucd_record(code)->mirrored == 0)
-        return code;
 
     mp.from = code;
     res = (MirrorPair *) bsearch(&mp, mirror_pairs, BIDI_MIRROR_LEN,
