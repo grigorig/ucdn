@@ -164,7 +164,7 @@ def maketables(trace=0):
 
 def makeunicodedata(unicode, trace):
 
-    dummy = (CATEGORY_NAMES.index("Cn"), 0, BIDIRECTIONAL_NAMES.index("ON"), 0,
+    dummy = (CATEGORY_NAMES.index("Cn"), 0, BIDIRECTIONAL_NAMES.index("ON"),
         EASTASIANWIDTH_NAMES.index("N"), SCRIPT_NAMES.index("Unknown"),
         LINEBREAK_CLASSES.index("XX"))
     table = [dummy]
@@ -184,12 +184,11 @@ def makeunicodedata(unicode, trace):
             category = CATEGORY_NAMES.index(record[2])
             combining = int(record[3])
             bidirectional = BIDIRECTIONAL_NAMES.index(record[4])
-            mirrored = record[9] == "Y"
             eastasianwidth = EASTASIANWIDTH_NAMES.index(record[15])
             scriptname = SCRIPT_NAMES.index(record[18])
             linebreakclass = LINEBREAK_CLASSES.index(record[19])
             item = (
-                category, combining, bidirectional, mirrored, eastasianwidth,
+                category, combining, bidirectional, eastasianwidth,
                 scriptname, linebreakclass
                 )
             # add entry to index and item tables
@@ -308,7 +307,7 @@ def makeunicodedata(unicode, trace):
     print("/* a list of unique database records */", file=fp)
     print("static const UCDRecord ucd_records[] = {", file=fp)
     for item in table:
-        print("    {%d, %d, %d, %d, %d, %d, %d}," % item, file=fp)
+        print("    {%d, %d, %d, %d, %d, %d}," % item, file=fp)
     print("};", file=fp)
     print(file=fp)
 
