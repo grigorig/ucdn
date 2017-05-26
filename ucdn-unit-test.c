@@ -162,9 +162,7 @@ START_TEST(test_linebreak_class)
     ck_assert_int_eq(ucdn_get_linebreak_class(0xffef), UCDN_LINEBREAK_CLASS_XX); /* unassigned */
     ck_assert_int_eq(ucdn_get_linebreak_class(0xd800), UCDN_LINEBREAK_CLASS_SG); /* surrogate */
     ck_assert_int_eq(ucdn_get_linebreak_class(0x3400), UCDN_LINEBREAK_CLASS_ID); /* not part of database */
-    #if 0
     ck_assert_int_eq(ucdn_get_linebreak_class(0x1f46e), UCDN_LINEBREAK_CLASS_EB); /* outside BMP, unusual class */
-    #endif
     ck_assert_int_eq(ucdn_get_linebreak_class(0x200000), UCDN_LINEBREAK_CLASS_XX); /* outside of Unicode */
 }
 END_TEST
