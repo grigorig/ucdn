@@ -23,8 +23,8 @@ find_package(Check REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CHECK_INCLUDE_DIRS})
 
-add_executable(ucdn-unittest ucdn-unittest.c)
-target_link_libraries(ucdn-unittest ucdn ${CHECK_LIBRARIES} pthread)
+add_executable(ucdn-unit-test ucdn-unit-test.c)
+target_link_libraries(ucdn-unit-test ucdn ${CHECK_LIBRARIES} pthread)
 
 enable_testing()
-add_test(NAME ucdn-unitttest COMMAND ucdn-unittest)
+add_test(NAME ucdn-unitttest COMMAND ucdn-unit-test)
