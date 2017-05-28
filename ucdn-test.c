@@ -24,6 +24,12 @@ int main(int argc, char **argv)
     int i, len;
     uint32_t decomposed[18];
 
+    uint32_t c = 0, d = 0;
+    for (i = 0; i < 100E6; i++) {
+        c += ucdn_compose(&d, 0x0041, 0x0308);
+    }
+    printf("c = %d, d = %04x\n", c, d);
+
     if (argc < 2)
         return EXIT_FAILURE;
 

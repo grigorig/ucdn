@@ -90,6 +90,8 @@ static const unsigned short *get_decomp_record(uint32_t code)
     return &decomp_data[index];
 }
 
+#define USE_CXX_BSEARCH
+#ifndef USE_CXX_BSEARCH
 static int compare_reindex(const void *a, const void *b)
 {
     Reindex *ra = (Reindex *)a;
@@ -102,19 +104,45 @@ static int compare_reindex(const void *a, const void *b)
     else
         return 0;
 }
+#endif
 
+#ifdef USE_CXX_BSEARCH
+#include <iterator>
+#include <algorithm>
+
+class CompareReindex
+{
+public:
+    bool operator() (const Reindex& ra, const uint32_t& code) const {
+        if ((ra.start + ra.count) < code)
+            return true;
+        else
+            return false;
+    }
+};
+static auto constexpr compare_reindex = CompareReindex();
+template<size_t N> int get_comp_index(uint32_t code, const Reindex (&idx)[N])
+{
+    auto it = std::lower_bound(std::begin(idx), std::end(idx), code, compare_reindex);
+    if (it == std::end(idx))
+        return -1;
+    else
+        return it->index + (code - it->start);
+}
+#else
 static int get_comp_index(uint32_t code, const Reindex *idx, size_t len)
 {
     Reindex *res;
     Reindex r = {0, 0, 0};
     r.start = code;
-    res = bsearch(&r, idx, len, sizeof(Reindex), compare_reindex);
+    res = (Reindex *)bsearch(&r, idx, len, sizeof(Reindex), compare_reindex);
 
     if (res != NULL)
         return res->index + (code - res->start);
     else
         return -1;
 }
+#endif
 
 static int compare_mp(const void *a, const void *b)
 {
@@ -327,9 +355,14 @@ int ucdn_compose(uint32_t *code, uint32_t a, uint32_t b)
     if (hangul_pair_compose(code, a, b))
         return 1;
 
+#ifdef USE_CXX_BSEARCH
+
+    l = get_comp_index<sizeof(nfc_first) / sizeof(Reindex)>(a, nfc_first);
+    r = get_comp_index<sizeof(nfc_last) / sizeof(Reindex)>(b, nfc_last);
+#else
     l = get_comp_index(a, nfc_first, sizeof(nfc_first) / sizeof(Reindex));
     r = get_comp_index(b, nfc_last, sizeof(nfc_last) / sizeof(Reindex));
-
+#endif
     if (l < 0 || r < 0)
         return 0;
 
