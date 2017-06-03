@@ -339,11 +339,9 @@ int ucdn_decompose(uint32_t code, uint32_t *a, uint32_t *b)
         return 0;
 
     rec++;
+    /* standard decompositions are always pairwise */
     *a = decode_utf16(&rec);
-    if (len > 1)
-        *b = decode_utf16(&rec);
-    else
-        *b = 0;
+    *b = decode_utf16(&rec);
 
     return 1;
 }
