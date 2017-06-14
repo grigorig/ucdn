@@ -108,7 +108,7 @@ static int get_comp_index(uint32_t code, const Reindex *idx, size_t len)
     Reindex *res;
     Reindex r = {0, 0, 0};
     r.start = code;
-    res = bsearch(&r, idx, len, sizeof(Reindex), compare_reindex);
+    res = (Reindex *) bsearch(&r, idx, len, sizeof(Reindex), compare_reindex);
 
     if (res != NULL)
         return res->index + (code - res->start);
