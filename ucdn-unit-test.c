@@ -387,6 +387,9 @@ START_TEST(test_decompose_special)
     /* very long decomposition */
     ret = ucdn_compat_decompose(0xfdfa, decomp); ck_assert(ret == 18 && memcmp(decomp, long_cmp, 18) == 0);
 
+    /* very short (single character) decomposition */
+    ret = ucdn_decompose(0x212b, &a, &b); ck_assert(ret && a == 0x00c5 && b == 0);
+
     /* outside Unicode */
     ret = ucdn_compat_decompose(0x200000, decomp); ck_assert(ret == 0); /* no decomposition */
 }
