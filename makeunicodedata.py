@@ -35,7 +35,7 @@ SCRIPT = sys.argv[0]
 VERSION = "3.2"
 
 # The Unicode Database
-UNIDATA_VERSION = "10.0.0"
+UNIDATA_VERSION = "11.0.0"
 UNICODE_DATA = "UnicodeData%s.txt"
 COMPOSITION_EXCLUSIONS = "CompositionExclusions%s.txt"
 EASTASIAN_WIDTH = "EastAsianWidth%s.txt"
@@ -96,7 +96,8 @@ SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Tirhuta", "Warang_Citi", "Ahom", "Anatolian_Hieroglyphs", "Hatran",
     "Multani", "Old_Hungarian", "SignWriting", "Adlam", "Bhaiksuki",
     "Marchen", "Newa", "Osage", "Tangut", "Masaram_Gondi", "Nushu", "Soyombo",
-    "Zanabazar_Square"
+    "Zanabazar_Square", "Dogra", "Gunjala_Gondi", "Hanifi_Rohingya", "Makasar",
+    "Medefaidrin", "Old_Sogdian", "Sogdian"
     ]
 
 EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
@@ -131,17 +132,6 @@ CASE_IGNORABLE_MASK = 0x1000
 CASED_MASK = 0x2000
 EXTENDED_CASE_MASK = 0x4000
 
-# these ranges need to match unicodedata.c:is_unified_ideograph
-cjk_ranges = [
-    ('3400', '4DB5'),
-    ('4E00', '9FEA'),
-    ('20000', '2A6D6'),
-    ('2A700', '2B734'),
-    ('2B740', '2B81D'),
-    ('2B820', '2CEA1'),
-    ('2CEB0', '2EBE0')
-]
-
 def maketables(trace=0):
 
     print("--- Reading", UNICODE_DATA % "", "...")
@@ -153,7 +143,7 @@ def maketables(trace=0):
 
     for version in old_versions:
         print("--- Reading", UNICODE_DATA % ("-"+version), "...")
-        old_unicode = UnicodeData(version, cjk_check=False)
+        old_unicode = UnicodeData(version)
         print(len(list(filter(None, old_unicode.table))), "characters")
         merge_old_version(version, unicode, old_unicode)
 
@@ -995,7 +985,6 @@ class UnicodeData:
     def __init__(self, version,
                  linebreakprops=False,
                  expand=1,
-                 cjk_check=True,
                  named_seq=False):
         self.changed = []
         table = [None] * 0x110000
@@ -1022,17 +1011,12 @@ class UnicodeData:
                         s[1] = ""
                         field = s
                     elif s[1][-5:] == "Last>":
-                        if s[1].startswith("<CJK Ideograph"):
-                            cjk_ranges_found.append((field[0],
-                                                     s[0]))
                         s[1] = ""
                         field = None
                 elif field:
                     f2 = field[:]
                     f2[0] = "%X" % i
                     table[i] = f2
-            if cjk_check and cjk_ranges != cjk_ranges_found:
-                raise ValueError("CJK ranges deviate: have %r" % cjk_ranges_found)
 
         # set default to unassigned characters
         for i in range(0, 0x110000):
