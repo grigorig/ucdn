@@ -35,7 +35,7 @@ SCRIPT = sys.argv[0]
 VERSION = "3.2"
 
 # The Unicode Database
-UNIDATA_VERSION = "11.0.0"
+UNIDATA_VERSION = "12.0.0"
 UNICODE_DATA = "UnicodeData%s.txt"
 COMPOSITION_EXCLUSIONS = "CompositionExclusions%s.txt"
 EASTASIAN_WIDTH = "EastAsianWidth%s.txt"
@@ -97,7 +97,8 @@ SCRIPT_NAMES = [ "Common", "Latin", "Greek", "Cyrillic", "Armenian",
     "Multani", "Old_Hungarian", "SignWriting", "Adlam", "Bhaiksuki",
     "Marchen", "Newa", "Osage", "Tangut", "Masaram_Gondi", "Nushu", "Soyombo",
     "Zanabazar_Square", "Dogra", "Gunjala_Gondi", "Hanifi_Rohingya", "Makasar",
-    "Medefaidrin", "Old_Sogdian", "Sogdian"
+    "Medefaidrin", "Old_Sogdian", "Sogdian", "Elymaic", "Nandinagari",
+    "Nyiakeng_Puachue_Hmong", "Wancho"
     ]
 
 EASTASIANWIDTH_NAMES = [ "F", "H", "W", "Na", "A", "N" ]
