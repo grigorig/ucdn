@@ -274,13 +274,23 @@ static const TestTuple script_tests[] =
     {  0x1f92e, UCDN_SCRIPT_COMMON },
     {   0x20bf, UCDN_SCRIPT_COMMON },
 
+    /* Unicode-11.0 additions */
+    { 0x11800, UCDN_SCRIPT_DOGRA },
+    {  0x1CB4, UCDN_SCRIPT_GEORGIAN },
+    { 0x11D60, UCDN_SCRIPT_GUNJALA_GONDI },
+    { 0x10D00, UCDN_SCRIPT_HANIFI_ROHINGYA },
+    { 0x11EE0, UCDN_SCRIPT_MAKASAR },
+    { 0x16E40, UCDN_SCRIPT_MEDEFAIDRIN },
+    { 0x10F00, UCDN_SCRIPT_OLD_SOGDIAN },
+    { 0x10F30, UCDN_SCRIPT_SOGDIAN },
+
     { 0x111111, UCDN_SCRIPT_UNKNOWN }
 };
 
 START_TEST(test_basic)
 {
     /* check versio */
-    ck_assert_str_eq(ucdn_get_unicode_version(), "10.0.0");
+    ck_assert_str_eq(ucdn_get_unicode_version(), "11.0.0");
 
     /* one sample check inside BMP for each property */
     ck_assert_int_eq(ucdn_get_general_category(0x0040), 21);
